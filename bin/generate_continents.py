@@ -4,6 +4,7 @@ import json
 import pickle
 import sys
 
+PICKLE_PROTOCOL = 5
 CONTINENT_MAPPING = {
     'AF': 'Africa',
     'AN': 'Antarctica',
@@ -32,7 +33,7 @@ def generate(input_) -> dict:
 
 def main(input_, output) -> None:
     #print(sorted(generate(input_).keys()))
-    pickle.dump(generate(input_), output)
+    pickle.dump(generate(input_), output, protocol=PICKLE_PROTOCOL)
 
 if __name__ == '__main__':
     main(sys.stdin, sys.stdout.buffer)
