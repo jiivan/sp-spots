@@ -26,14 +26,17 @@ def fetch(path: str) -> list:
 
 def alerts(filter_):
     log.info("Alerts")
+    t = prettytable.PrettyTable()
+    t.field_names = ["activator", "ref", "start", "duration", "info"]
     for item in fetch("activation"):
         if not filter_(item['reference']):
             continue
-        print(item['scheduledActivitiesId'])
         start_dt = datetime.datetime.fromisoformat(f"{item['startDate']}T{item['startTime']}:00+00:00")
         end_dt = datetime.datetime.fromisoformat(f"{item['endDate']}T{item['endTime']}:00+00:00")
         delta = end_dt - start_dt
-        log.info(f"{item['activator']}@{item['reference']} {item['startDate']} {item['startTime']} -> {delta} ({item['name']}, {item['comments']}, freq: {item['frequencies']})")
+        log.debug(f"id:{item['scheduledActivitiesId']} {item['activator']}@{item['reference']} {item['startDate']} {item['startTime']} -> {delta} ({item['name']}, {item['comments']}, freq: {item['frequencies']})")
+        t.add_row([item['activator'], item['reference'], start_dt, delta, f"{item['name']}, {item['comments']}, freq: {item['frequencies']}"[:80]])
+    print(t)
 
 def spots(filter_):
     log.info("Spots")
