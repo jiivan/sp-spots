@@ -3,11 +3,15 @@
 API_URL = "https://api.pota.app"
 CONTINENT = "Europe"
 CONTINENTS_PATH = "data/continents.pickle5"
+ALERTS_PATH = "data/alerts.db"
 
 import datetime
+from dateutil.relativedelta import relativedelta
 import logging
 import pickle
+import prettytable
 import requests
+import sqlite3
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
@@ -33,11 +37,16 @@ def alerts(filter_):
 
 def spots(filter_):
     log.info("Spots")
+    t = prettytable.PrettyTable()
+    t.field_names = ["activator", "ref", "freq", "mode", "cnt", "age"]
     for item in fetch("spot/activator"):
         if not filter_(item['reference']):
             continue
-        log.info(f"{item['activator']}@{item['reference']} cnt:{item['count']} {item['frequency']}-{item['mode']} {item['spotTime']} by:{item['spotter']}({item['source']}) ({item['name']}, {item['comments']})")
-        print(f"POTA {item['activator']} AT {item['reference']} = FRQ {item['frequency']} {item['mode']} = CNT {item['count']}")
+        log.debug(f"{item['activator']}@{item['reference']} cnt:{item['count']} {item['frequency']}-{item['mode']} {item['spotTime']} by:{item['spotter']}({item['source']}) ({item['name']}, {item['comments']})")
+        spot_dt = datetime.datetime.fromisoformat(f"{item['spotTime']}+00:00")
+        spot_delta = relativedelta(datetime.datetime.now(datetime.timezone.utc), spot_dt)
+        t.add_row([item['activator'], item['reference'], f"{float(item['frequency']):.2f}", item['mode'], item['count'], f"{spot_delta.minutes} minutes {spot_delta.seconds} seconds"])
+    print(t)
 
 if __name__ == '__main__':
     continents = load_continents(CONTINENTS_PATH)
