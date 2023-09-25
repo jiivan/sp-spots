@@ -26,13 +26,16 @@ def fetch(path: str) -> list:
 
 def alerts(filter_):
     log.info("Alerts")
+    now = datetime.datetime.now(datetime.timezone.utc)
     t = prettytable.PrettyTable()
     t.field_names = ["activator", "ref", "start", "duration", "info"]
     for item in fetch("activation"):
         if not filter_(item['reference']):
             continue
-        start_dt = datetime.datetime.fromisoformat(f"{item['startDate']}T{item['startTime']}:00+00:00")
         end_dt = datetime.datetime.fromisoformat(f"{item['endDate']}T{item['endTime']}:00+00:00")
+        if end_dt < now:
+            continue
+        start_dt = datetime.datetime.fromisoformat(f"{item['startDate']}T{item['startTime']}:00+00:00")
         delta = end_dt - start_dt
         log.debug(f"id:{item['scheduledActivitiesId']} {item['activator']}@{item['reference']} {item['startDate']} {item['startTime']} -> {delta} ({item['name']}, {item['comments']}, freq: {item['frequencies']})")
         t.add_row([item['activator'], item['reference'], start_dt, delta, f"{item['name']}, {item['comments']}, freq: {item['frequencies']}"[:80]])
@@ -42,12 +45,13 @@ def spots(filter_):
     log.info("Spots")
     t = prettytable.PrettyTable()
     t.field_names = ["activator", "ref", "freq", "mode", "cnt", "age"]
+    now = datetime.datetime.now(datetime.timezone.utc)
     for item in fetch("spot/activator"):
         if not filter_(item['reference']):
             continue
         log.debug(f"{item['activator']}@{item['reference']} cnt:{item['count']} {item['frequency']}-{item['mode']} {item['spotTime']} by:{item['spotter']}({item['source']}) ({item['name']}, {item['comments']})")
         spot_dt = datetime.datetime.fromisoformat(f"{item['spotTime']}+00:00")
-        spot_delta = relativedelta(datetime.datetime.now(datetime.timezone.utc), spot_dt)
+        spot_delta = relativedelta(now, spot_dt)
         t.add_row([item['activator'], item['reference'], f"{float(item['frequency']):.2f}", item['mode'], item['count'], f"{spot_delta.minutes} minutes {spot_delta.seconds} seconds"])
     print(t)
 
