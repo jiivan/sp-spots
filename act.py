@@ -25,7 +25,7 @@ def fetch(path: str) -> list:
     return response.json()
 
 def alerts(filter_):
-    log.info("Alerts")
+    log.debug("Alerts")
     now = datetime.datetime.now(datetime.timezone.utc)
     t = prettytable.PrettyTable()
     t.field_names = ["activator", "ref", "start", "duration (left)", "info"]
@@ -42,7 +42,7 @@ def alerts(filter_):
     print(t)
 
 def spots(filter_):
-    log.info("Spots")
+    log.debug("Spots")
     t = prettytable.PrettyTable()
     t.field_names = ["activator", "ref", "freq", "mode", "cnt", "age"]
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -53,10 +53,11 @@ def spots(filter_):
         spot_dt = datetime.datetime.fromisoformat(f"{item['spotTime']}+00:00")
         spot_delta = relativedelta(now, spot_dt)
         t.add_row([item['activator'], item['reference'], f"{float(item['frequency']):.2f}", item['mode'], item['count'], f"{spot_delta.minutes} minutes {spot_delta.seconds} seconds"])
-    print(t)
+    if t.rowcount:
+        print(t)
 
 if __name__ == '__main__':
     continents = load_continents(CONTINENTS_PATH)
     filter_ = lambda ref: ref.split('-')[0] in continents['Europe']
-    alerts(filter_)
     spots(filter_)
+    alerts(filter_)
