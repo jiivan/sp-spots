@@ -36,6 +36,9 @@ def alerts(filter_):
         if end_dt < now:
             continue
         start_dt = datetime.datetime.fromisoformat(f"{item['startDate']}T{item['startTime']}:00+00:00")
+        if (end_dt - start_dt).days > 1:
+            log.info(f"Filtering out spammy alert by {item['activator']}@{item['reference']}")
+            continue
         delta = end_dt - max(start_dt, now)
         log.debug(f"id:{item['scheduledActivitiesId']} {item['activator']}@{item['reference']} {item['startDate']} {item['startTime']} -> {delta} ({item['name']}, {item['comments']}, freq: {item['frequencies']})")
         t.add_row([item['activator'], item['reference'], start_dt, delta, f"{item['name']}, {item['comments']}, freq: {item['frequencies']}"[:80]])
