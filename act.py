@@ -24,11 +24,20 @@ def fetch(path: str) -> list:
     response = requests.get(f"{API_URL}/{path}")
     return response.json()
 
+def _format_delta(td: relativedelta) -> str:
+    if td.days:
+        days = f"{td.days} days "
+    else:
+        days = ""
+    return f"{days} {td.hours:02}:{td.minutes:02}"
+
 def alerts(filter_):
     log.debug("Alerts")
     now = datetime.datetime.now(datetime.timezone.utc)
     t = prettytable.PrettyTable()
-    t.field_names = ["activator", "ref", "start", "duration (left)", "info"]
+    t.field_names = ["activator", "ref", "start", "time to start", "duration (left)", "info"]
+    t.align = "r"
+    t.align["info"] = "l"
     for item in fetch("activation"):
         if not filter_(item['reference']):
             continue
@@ -40,8 +49,9 @@ def alerts(filter_):
             log.info(f"Filtering out spammy alert by {item['activator']}@{item['reference']}")
             continue
         delta = end_dt - max(start_dt, now)
+        tts = _format_delta(relativedelta(max(start_dt, now), now))
         log.debug(f"id:{item['scheduledActivitiesId']} {item['activator']}@{item['reference']} {item['startDate']} {item['startTime']} -> {delta} ({item['name']}, {item['comments']}, freq: {item['frequencies']})")
-        t.add_row([item['activator'], item['reference'], start_dt, delta, f"{item['name']}, {item['comments']}, freq: {item['frequencies']}"[:80]])
+        t.add_row([item['activator'], item['reference'], start_dt.strftime("%y-%m-%d %H:%MZ"), tts, delta, f"{item['name']}, {item['comments']}, freq: {item['frequencies']}"[:80]])
     print(t)
 
 def spots(filter_):
