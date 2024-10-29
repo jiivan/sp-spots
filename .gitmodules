@@ -1,3 +1,6 @@
 [submodule "dxcc-json"]
 	path = dxcc-json
 	url = git@github.com:k0swe/dxcc-json.git
+[submodule "ISO-3166-Countries-with-Regional-Codes"]
+	path = ISO-3166-Countries-with-Regional-Codes
+	url = git@github.com:lukes/ISO-3166-Countries-with-Regional-Codes.git

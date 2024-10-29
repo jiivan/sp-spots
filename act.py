@@ -2,7 +2,7 @@
 
 API_URL = "https://api.pota.app"
 CONTINENT = "Europe"
-CONTINENTS_PATH = "data/continents.pickle5"
+CONTINENTS_PATH = "data/continents-iso.pickle5"
 ALERTS_PATH = "data/alerts.db"
 
 import datetime
@@ -71,6 +71,6 @@ def spots(filter_):
 
 if __name__ == '__main__':
     continents = load_continents(CONTINENTS_PATH)
-    filter_ = lambda ref: ref.split('-')[0] in continents['Europe']
+    filter_ = lambda ref: ref.split('-')[0] in continents[CONTINENT] | continents["Antarctica"]
     spots(filter_)
     alerts(filter_)
