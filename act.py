@@ -25,11 +25,13 @@ def fetch(path: str) -> list:
     return response.json()
 
 def _format_delta(td: relativedelta) -> str:
-    if td.days:
+    if td.months:
+        days = f"{td.months} mnth "
+    elif td.days:
         days = f"{td.days} days "
     else:
         days = ""
-    return f"{days} {td.hours:02}:{td.minutes:02}"
+    return f"{days}{td.hours:02}:{td.minutes:02}"
 
 def alerts(filter_):
     log.debug("Alerts")
