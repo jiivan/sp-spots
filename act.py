@@ -61,7 +61,7 @@ def spots(filter_):
     t = prettytable.PrettyTable()
     t.field_names = ["activator", "ref", "freq", "mode", "cnt", "age"]
     now = datetime.datetime.now(datetime.timezone.utc)
-    for item in fetch("spot/activator"):
+    for item in sorted(fetch("spot/activator"), key=lambda i: i['spotTime'], reverse= True):
         if not filter_(item['reference']):
             continue
         log.debug(f"{item['activator']}@{item['reference']} cnt:{item['count']} {item['frequency']}-{item['mode']} {item['spotTime']} by:{item['spotter']}({item['source']}) ({item['name']}, {item['comments']})")
